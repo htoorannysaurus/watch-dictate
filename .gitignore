@@ -1,0 +1,8 @@
+# secrets and generated
+watch/Shared/Secrets.swift
+watch/*.xcodeproj/
+watch/App/Info.plist
+watch/Phone/Info.plist
+watch/Widgets/Info.plist
+server/node_modules/
+.DS_Store

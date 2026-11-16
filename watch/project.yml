@@ -1,0 +1,91 @@
+# Generate WatchDictate.xcodeproj with XcodeGen. Built on the Mac; see README.md.
+name: WatchDictate
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    watchOS: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: YOUR_TEAM_ID
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "1.0.48"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  # iPhone app: status, the shared engine setting, recent notes, setup tips.
+  # Carries the watch app to TestFlight; archive this scheme for upload.
+  Dictate:
+    type: application
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources: [Phone, Shared]
+    info:
+      path: Phone/Info.plist
+      properties:
+        CFBundleDisplayName: Claudeputer Dictation
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIBackgroundModes: [audio]   # read replies aloud when the watch asks, app in the background
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.watchdictate
+        PRODUCT_NAME: Dictate
+        TARGETED_DEVICE_FAMILY: "1"
+    dependencies:
+      - target: WatchDictate
+  # The watch app: tap to talk, tap again to send; opens straight into recording
+  WatchDictate:
+    type: application
+    platform: watchOS
+    sources: [App, Intent, Shared]
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Claudeputer Dictation
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: com.example.watchdictate
+        WKRunsIndependentlyOfCompanionApp: true
+        UIBackgroundModes: [audio]   # keep recording with the screen off
+        NSMicrophoneUsageDescription: Claudeputer Dictation records your voice and sends the transcript to the chat you choose.
+        CFBundleURLTypes:
+          - CFBundleURLSchemes: [watchdictate]
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.watchdictate.watchkitapp
+        SKIP_INSTALL: "YES"
+    dependencies:
+      - target: DictateWidgets
+  # Control Center button + watch face complication; both open the app recording
+  DictateWidgets:
+    type: app-extension
+    platform: watchOS
+    sources: [Widgets, Intent, Shared]   # Shared: server access for the status widget
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: Claudeputer Dictation
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.watchdictate.watchkitapp.widgets
+schemes:
+  Dictate:
+    build:
+      targets:
+        Dictate: all
+    archive:
+      config: Release
+  WatchDictate:
+    build:
+      targets:
+        WatchDictate: all
+    run:
+      config: Debug
